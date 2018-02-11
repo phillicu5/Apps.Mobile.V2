@@ -1,25 +1,14 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons end>
+      <button ion-button (click)="skip()">
+        Skip
+      </button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
 <ion-content class="bg-swoosh no-scroll" style="background: #333;">
   <ion-slides #slides>
-    <!-- Offer passcode slide -->
-    <ion-slide>
-      <div class="padding-x2">
-        <div class="animation-steps">
-          <div class="animation-step-1">
-            <p>Hi Phil</p>
-          </div>
-          <div class="animation-step-2">
-            <p>Let's make logging in easier</p>
-          </div>
-          <div class="animation-step-3">
-            <p>Would you like to set up a passcode?</p>
-          </div>
-        </div>
-        <div class="btn-row btn-inverse">
-          <button ion-button (click)="onConfigurePasscode()" class="btn btn-primary">OK</button>
-          <button ion-button (click)="onDeclinePasscode()" class="btn btn-default">No Thanks</button>
-        </div>
-      </div>
-    </ion-slide>
     <!-- Choose passcode slide -->
     <ion-slide>
       <p class="question">Choose your passcode</p>
@@ -33,7 +22,4 @@
       </passcode-entry>
     </ion-slide>
   </ion-slides>
-  <div class="footer-buttons">
-    <button ion-button (click)="onDeclinePasscode()">Skip this bit</button>
-  </div>
 </ion-content>

@@ -1,9 +1,10 @@
-import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { HttpClient, HttpEvent } from '@angular/common/http';
 
 /**
  * Provides a wrapper around standard HTTP client to allow it to be extended.
  */
-export class httpService {
+export class HttpService {
 
     // The base URL for all requests
     private baseUrl: string;
@@ -17,39 +18,39 @@ export class httpService {
     /**
      *  Performs a GET requst to the specified URL.
      */
-    get(endpoint: string, params?: any, options?: any) {
+    get<T>(endpoint: string, params?: any, options?: any): Observable<T> | Observable<HttpEvent<T>> {
 
         options = options || {};
         options.params = params;
 
-        return this.httpClient.get(this.baseUrl + '/' + endpoint, options);
+        return this.httpClient.get<T>(this.baseUrl + '/' + endpoint, options);
     }
 
     /**
      *  Performs a POST requst to the specified URL.
      */
-    post(endpoint: string, body: any, options?: any) {
-        return this.httpClient.post(this.baseUrl + '/' + endpoint, body, options);
+    post<T>(endpoint: string, body: any, options?: any): Observable<T> | Observable<HttpEvent<T>> {
+        return this.httpClient.post<T>(this.baseUrl + '/' + endpoint, body, options);
     }
 
     /**
      *  Performs a PUT requst to the specified URL.
      */
-    put(endpoint: string, body: any, options?: any) {
-        return this.httpClient.put(this.baseUrl + '/' + endpoint, body, options);
+    put<T>(endpoint: string, body: any, options?: any): Observable<T> | Observable<HttpEvent<T>> {
+        return this.httpClient.put<T>(this.baseUrl + '/' + endpoint, body, options);
     }
 
     /**
      *  Performs a DELETE requst to the specified URL.
      */
-    delete(endpoint: string, options?: any) {
-        return this.httpClient.delete(this.baseUrl + '/' + endpoint, options);
+    delete<T>(endpoint: string, options?: any): Observable<T> | Observable<HttpEvent<T>> {
+        return this.httpClient.delete<T>(this.baseUrl + '/' + endpoint, options);
     }
 
     /**
      *  Performs a PATCH requst to the specified URL.
      */
-    patch(endpoint: string, body: any, options?: any) {
-        return this.httpClient.put(this.baseUrl + '/' + endpoint, body, options);
+    patch<T>(endpoint: string, body: any, options?: any): Observable<T> | Observable<HttpEvent<T>> {
+        return this.httpClient.put<T>(this.baseUrl + '/' + endpoint, body, options);
     }
 }

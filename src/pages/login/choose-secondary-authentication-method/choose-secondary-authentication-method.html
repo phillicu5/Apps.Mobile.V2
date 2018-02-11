@@ -1,0 +1,35 @@
+<!--
+  Generated template for the ChooseSecondaryAuthenticationMethodPage page.
+
+  See http://ionicframework.com/docs/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>choose-secondary-authentication-method</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding>
+
+<div>
+  <p>Would you like to enable TouchID?</p>
+  <div class="button-row">
+    <button (click)="navigateToConfigureTouchIdPage()" ion-button>OK</button>
+    <button (click)="navigateToAuthNewUserPage()" ion-button>No Thanks</button>
+  </div>
+</div>
+
+<div>
+    <p>Would you like to set up a passcode?</p>
+    <div class="button-row">
+      <button (click)="navigateToConfigurePasscodePage()" ion-button>OK</button>
+      <button (click)="navigateToAuthNewUserPage()" ion-button>No Thanks</button>
+    </div>
+  </div>
+  
+
+</ion-content>

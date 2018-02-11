@@ -1,10 +1,12 @@
-import { WelcomePage } from './../pages/welcome/welcome';
 import { Component } from '@angular/core';
-import { Platform } from 'ionic-angular';
-import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
-import { AuthNewUserPage, AuthDeviceUserPage } from '../pages/login';
-import { Settings } from '../providers/index';
+import { StatusBar } from '@ionic-native/status-bar';
+import { Platform } from 'ionic-angular';
+
+import { AuthDeviceUserPage, AuthNewUserPage } from '../pages/login';
+import { Settings } from '../providers';
+import { WelcomePage } from './../pages/welcome/welcome';
+import { DeviceUserService } from './../providers/authentication/device-user.service';
 
 //import { HomePage } from '../pages/home/home';
 @Component({
@@ -17,7 +19,8 @@ export class MyApp {
     platform: Platform,
     statusBar: StatusBar,
     splashScreen: SplashScreen,
-    private settings: Settings) {
+    private settings: Settings,
+    private deviceUserService: DeviceUserService) {
 
     platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
@@ -25,12 +28,19 @@ export class MyApp {
 
       this.bootstrap()
         .then(() => {
-          console.log(this.settings.current);
+
           // Determine which page to display first
           if (!this.settings.current.hasViewedWelcomePage) {
             this.rootPage = WelcomePage;
-          } else{
-            this.rootPage = AuthNewUserPage;
+          } else {
+
+            const deviceUser = this.deviceUserService.deviceUser;
+            if (deviceUser == null) {
+              this.rootPage = AuthNewUserPage;
+            }
+            else {
+              this.rootPage = AuthDeviceUserPage;
+            }
           }
 
           statusBar.styleDefault();
@@ -55,6 +65,7 @@ export class MyApp {
   private bootstrap(): Promise<any> {
     return Promise.all([
       this.settings.bootstrap(),
+      this.deviceUserService.bootstrap().toPromise()
     ]);
   }
 }

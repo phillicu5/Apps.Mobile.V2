@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage';
+import { Observable } from 'rxjs/Observable';
 
-import { DeviceUser } from './device-user';
+import { Logger, LoggerFactory } from '../../core';
 import { SecureStorageWrapper } from '../../core/cordova-wrappers';
-import { Deferred, Logger, LoggerFactory } from '../../core';
+import { DeviceUser } from './device-user';
 
 const DeviceUserStorageKey: string = 'DeviceUser';
 const PasswordStorageKey: string = 'Password';
@@ -37,7 +38,7 @@ export class DeviceUserService {
     /**
      * Bootstraps the service.
      */
-    public bootstrap(): Promise<any> {
+    public bootstrap(): Observable<any> {
 
         this.logger.debug('Bootstrapping.')
 
@@ -54,13 +55,13 @@ export class DeviceUserService {
             });
 
         // Return
-        return promise;
+        return Observable.fromPromise(promise);
     }
 
     /**
      * Sets the current version of the device user in storage.
      */
-    public setDeviceUser(): Promise<any> {
+    public setDeviceUser(): Observable<any> {
 
         // Ensure that the service has been bootstrapped
         this.ensureBootstrapped();
@@ -69,13 +70,13 @@ export class DeviceUserService {
         var promise = this.storage.set(DeviceUserStorageKey, this._deviceUser);
 
         // Return
-        return promise;
+        return Observable.fromPromise(promise);
     }
 
     /**
      * Sets the current version of the device user in storage.
      */
-    public setNewDeviceUser(deviceUser: DeviceUser): Promise<any> {
+    public setNewDeviceUser(deviceUser: DeviceUser): Observable<any> {
 
         // Ensure that the service has been bootstrapped
         this.ensureBootstrapped();
@@ -88,13 +89,13 @@ export class DeviceUserService {
             });
 
         // Return
-        return promise;
+        return Observable.fromPromise(promise);
     }
 
     /**
      * Clears the device user from storage.
      */
-    public clearDeviceUser(): Promise<any> {
+    public clearDeviceUser(): Observable<any> {
 
         // Ensure that the service has been bootstrapped
         this.ensureBootstrapped();
@@ -107,61 +108,59 @@ export class DeviceUserService {
             });;
 
         // Return
-        return promise;
+        return Observable.fromPromise(promise);
     }
 
     /**
      * Gets the password from secure storage.
      */
-    public getPassword(): Promise<string> {
+    public getPassword(): Observable<string> {
 
         // Ensure that the service has been bootstrapped
         this.ensureBootstrapped();
 
-        var deferred = new Deferred<string>();
-
         // Get the value from secure storage
-        this.secureStorageWrapper.get(PasswordStorageKey)
-            .then(value => {
+        var observable = this.secureStorageWrapper.get(PasswordStorageKey)
+            .flatMap(value => {
                 var password = value as string;
-                deferred.resolve(password);
+                return Observable.of(password);
             })
             .catch(reason => {
-                deferred.resolve(null);
+                return Observable.throw(reason);
             });
 
         // Return
-        return deferred.promise;
+        return observable;
     }
 
     /**
      * Sets the password in secure storage.
      */
-    public setPassword(password: string): Promise<any> {
+    public setPassword(password: string): Observable<any> {
 
         // Ensure that the service has been bootstrapped
         this.ensureBootstrapped();
 
         // Set the password in secure storage
-        var promise = this.secureStorageWrapper.set(PasswordStorageKey, password);
+        var observable = this.secureStorageWrapper.set(PasswordStorageKey, password);
 
         // Return
-        return promise;
+        return observable;
     }
 
     /**
      * Clears the password from secure storage.
      */
-    public clearPassword(): Promise<any> {
+    public clearPassword(): Observable<any> {
 
         // Ensure that the service has been bootstrapped
         this.ensureBootstrapped();
 
         // Remove the password from secure storage
-        var promise = this.secureStorageWrapper.remove(PasswordStorageKey);
+        var observable = this.secureStorageWrapper.remove(PasswordStorageKey);
 
         // Return
-        return promise;
+        return observable;
     }
 
     /**

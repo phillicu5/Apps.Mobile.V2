@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Platform } from 'ionic-angular';
-import { Storage } from '@ionic/storage';
 import { SecureStorage, SecureStorageObject } from '@ionic-native/secure-storage';
+import { Storage } from '@ionic/storage';
+import { Platform } from 'ionic-angular';
+import { Observable } from 'rxjs/Rx';
 
 import { PluginWrapper } from './plugin.wrapper';
 
@@ -30,7 +31,7 @@ export class SecureStorageWrapper extends PluginWrapper {
     /**
      * Bootstraps the secure storage wrapper. This should only be called after the device is ready.
      */
-    public bootstrap(): Promise<any> {
+    public bootstrap(): Observable<any> {
 
         var promise: Promise<any>;
 
@@ -57,39 +58,57 @@ export class SecureStorageWrapper extends PluginWrapper {
         }
 
         // Return
-        return promise;
+        return Observable.fromPromise(promise);
     }
 
     /**
      * Gets a value from secure storage.
      */
-    public get(reference: string): Promise<any> {
+    public get(reference: string): Observable<any> {
+
+        var promise: Promise<any>;
+
         if (this.isAvailable) {
-            return this.secureStorageObject.get(reference);
+            promise = this.secureStorageObject.get(reference);
         } else {
-            return this.storage.get(this.fallbackStorageKeyPrefix + reference);
+            promise = this.storage.get(this.fallbackStorageKeyPrefix + reference);
         }
+
+        // Return
+        return Observable.fromPromise(promise);
     }
 
     /**
      * Stores a value in secure storage.
      */
-    public set(reference: string, value: string): Promise<any> {
+    public set(reference: string, value: string): Observable<any> {
+
+        var promise: Promise<any>;
+
         if (this.isAvailable) {
-            return this.secureStorageObject.set(reference, value);
+            promise = this.secureStorageObject.set(reference, value);
         } else {
-            return this.storage.set(this.fallbackStorageKeyPrefix + reference, value);
+            promise = this.storage.set(this.fallbackStorageKeyPrefix + reference, value);
         }
+
+        // Return
+        return Observable.fromPromise(promise);
     }
 
     /**
      * Removes a value from secure storage.
      */
-    public remove(reference: string): Promise<any> {
+    public remove(reference: string): Observable<any> {
+
+        var promise: Promise<any>;
+
         if (this.isAvailable) {
-            return this.secureStorageObject.remove(reference);
+            promise = this.secureStorageObject.remove(reference);
         } else {
-            return this.storage.remove(this.fallbackStorageKeyPrefix + reference);
+            promise = this.storage.remove(this.fallbackStorageKeyPrefix + reference);
         }
+
+        // Return
+        return Observable.fromPromise(promise);
     }
 }

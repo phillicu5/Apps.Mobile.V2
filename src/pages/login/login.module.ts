@@ -1,7 +1,7 @@
-import { UIModule } from './../../ui/ui.module';
-
 import { NgModule } from '@angular/core';
-import { IonicPageModule } from 'ionic-angular';
+
+import { CoreModule } from './../../core/core.module';
+import { UIModule } from './../../ui/ui.module';
 import { AuthDeviceUserPageModule } from './auth-device-user/auth-device-user.module';
 import { AuthNewUserPageModule } from './auth-new-user/auth-new-user.module';
 import { ConfigurePasscodePageModule } from './configure-passcode/configure-passcode.module';
@@ -11,6 +11,7 @@ import { ResetPasscodePageModule } from './reset-passcode/reset-passcode.module'
 
 @NgModule({
     imports: [
+        CoreModule,
         UIModule,
         AuthDeviceUserPageModule,
         AuthNewUserPageModule,
