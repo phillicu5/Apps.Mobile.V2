@@ -1,0 +1,46 @@
+<div [class.busy]="busy">
+  <div>
+    <div>
+      <button (click)="onNumberClicked(7)">7</button>
+    </div>
+    <div>
+      <button (click)="onNumberClicked(8)">8</button>
+    </div>
+    <div>
+      <button (click)="onNumberClicked(9)">9</button>
+    </div>
+  </div>
+  <div>
+    <div>
+      <button (click)="onNumberClicked(4)">4</button>
+    </div>
+    <div>
+      <button (click)="onNumberClicked(5)">5</button>
+    </div>
+    <div>
+      <button (click)="onNumberClicked(6)">6</button>
+    </div>
+  </div>
+  <div>
+    <div>
+      <button (click)="onNumberClicked(1)">1</button>
+    </div>
+    <div>
+      <button (click)="onNumberClicked(2)">2</button>
+    </div>
+    <div>
+      <button (click)="onNumberClicked(3)">3</button>
+    </div>
+  </div>
+  <div>
+    <div></div>
+    <div>
+      <button (click)="onNumberClicked(0)">0</button>
+    </div>
+    <div>
+      <button (click)="onDeleteClicked()" [hidden]="!showBackspace">
+        <ion-icon name="backspace"></ion-icon>
+      </button>
+    </div>
+  </div>
+</div>

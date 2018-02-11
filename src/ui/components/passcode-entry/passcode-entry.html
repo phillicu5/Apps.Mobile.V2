@@ -1,0 +1,11 @@
+<div [class.incorrect]="incorrect">
+  <div class="passcode-digits">
+    <ul>
+      <li *ngFor="let i of setDigits" [class.set]="i">
+        <div></div>
+      </li>
+    </ul>
+  </div>
+  <numeric-keypad [busy]="busy" [showBackspace]="passcode !== ''" (numberClicked)="onNumberClicked($event)" (deleteClicked)="onDeleteClicked($event)">
+  </numeric-keypad>
+</div>
