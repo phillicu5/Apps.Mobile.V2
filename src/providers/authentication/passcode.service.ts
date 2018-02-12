@@ -94,7 +94,6 @@ export class PasscodeService {
             return Observable.throw(VerifyPasscodeError.Locked);
         }
 
-        var deferred = new deferred();
         var verifyPasscodeError: VerifyPasscodeError = null;
 
         // Get the passcode from secure storage
@@ -137,9 +136,8 @@ export class PasscodeService {
                 return setObservable;
             })
             .flatMap(data => {
-                // Complete the deferred based on the error
                 if (verifyPasscodeError === null) {
-                    return Observable.of({});
+                    return Observable.of(data);
                 } else {
                     return Observable.throw(verifyPasscodeError);
                 }
@@ -148,7 +146,7 @@ export class PasscodeService {
 
                 this.logger.warn('Failed to get passcode from secure storage.', reason)
 
-                // Reject the deferred
+                // Throw
                 return Observable.throw(VerifyPasscodeError.NotEnabledOrSet);
             });
 

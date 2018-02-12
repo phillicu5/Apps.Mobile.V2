@@ -21,7 +21,7 @@ export class ConfigurePasscodePage {
 
   private passcode: string;
 
-  @ViewChild('slides')
+  @ViewChild(Slides)
   private slides: Slides;
 
   /**

@@ -1,33 +1,38 @@
-<ion-content class="bg-swoosh no-scroll">
-  <div style=" height: 100%;" [class.state-passcode]="state=='passcode'" [class.state-password]="state=='password'">
-    <div class="page-container">
-      <div>
-        <p class="salutation">Hi Phil {{animationState}}</p>
-        <div class="centered-wrapper">
-          <!-- Passcode -->
-          <div class="passcode-wrapper">
-            <passcode-entry numberOfDigits="4" (onPasscodeCompleted)="onPasscodeCompleted($event)">
-            </passcode-entry>
-          </div>
-          <!-- Password -->
-          <div class="password-wrapper">
-            <div class="password-form">
-              <img src="assets/images/child-2.jpg" class="profile-image" />
-              <form [formGroup]="authForm" novalidate>
-                <ion-input type="password" formControlName="password" placeholder="Enter your password"></ion-input>
-                <div class="btn-stack btn-inverse">
-                  <button ion-button (click)="onSubmit(authForm.value)" class="btn btn-primary">Login</button>
-                  <button ion-button (click)="navigateToForgottenPasswordPage()" class="btn btn-link">Forgotten your password?</button>
-                </div>
-              </form>
+<ion-header>
+  <p class="salutation">Hi Phil {{animationState}}</p>
+</ion-header>
+
+<ion-content class="bg-swoosh no-scroll" style="background: #333;">
+  <ion-slides [initialSlide]="initialSlide">
+
+    <!-- Passcode -->
+    <ion-slide>
+      <passcode-entry numberOfDigits="4" (onPasscodeCompleted)="onPasscodeCompleted($event)">
+      </passcode-entry>
+    </ion-slide>
+
+    <!-- Password -->
+    <ion-slide>
+      <div class="password-wrapper">
+        <div class="password-form">
+          <img src="assets/images/child-2.jpg" class="profile-image" />
+          <form [formGroup]="authForm" novalidate>
+            <ion-input type="password" formControlName="password" placeholder="Enter your password"></ion-input>
+            <div class="btn-stack btn-inverse">
+              <button ion-button (click)="onSubmit(authForm.value)" class="btn btn-primary">Login</button>
+              <button ion-button (click)="navigateToForgottenPasswordPage()" class="btn btn-link">Forgotten your password?</button>
             </div>
-          </div>
+          </form>
         </div>
       </div>
-    </div>
-    <div class="btn-footer-row btn-inverse">
-      <button ion-button class="btn btn-link _enter-password" (click)="switchToPasswordState()">Enter Password</button>
-      <button ion-button class="btn btn-link" (click)="logInAsDifferentUser()">Different User?</button>
-    </div>
-  </div>
+    </ion-slide>
+
+  </ion-slides>
 </ion-content>
+
+<ion-footer>
+  <div class="button-row">
+    <button ion-button (click)="slideToPasswordSlide()" *ngIf="shouldShowEnterPasswordButton()" class="btn btn-link">Enter Password</button>
+    <button ion-button (click)="logInAsDifferentUser()" class="btn btn-link">Different User?</button>
+  </div>
+</ion-footer>

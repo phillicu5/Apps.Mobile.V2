@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AlertController, LoadingController, NavController, ToastController } from 'ionic-angular';
+import { AlertController, IonicPage, LoadingController, NavController, Slides, ToastController } from 'ionic-angular';
 import { Observable } from 'rxjs/Observable';
 
 import { Logger, LoggerFactory } from '../../../core';
@@ -15,6 +15,7 @@ import {
 import { AuthenticationService, LogInError, LogInErrorType } from '../../../providers/authentication/authentication.service';
 import { PasscodeCompletedEvent } from '../../../ui';
 
+@IonicPage()
 @Component({
   selector: 'page-auth-device-user',
   templateUrl: 'auth-device-user.html',
@@ -29,9 +30,13 @@ export class AuthDeviceUserPage {
   private viewDidEnter: boolean;
   private passcodeLocked: boolean;
 
+  public initialSlide: number = 0;
   public authForm: FormGroup;
-  public state: string = 'passcode';
   public deviceUser: DeviceUser;
+
+  @ViewChild(Slides)
+  private slides: Slides;
+
 
   /**
    * Creates an instance of AuthDeviceUserPage.
@@ -61,11 +66,17 @@ export class AuthDeviceUserPage {
     // Determine which state the page should be in
     if (!this.deviceUser.passcode.enabled || this.deviceUser.passcode.locked) {
       this.logger.debug('Passcode not enabled');
-      this.state = 'password';
+      this.initialSlide = 1;
     } else {
       this.logger.debug('Passcode enabled');
-      this.state = 'passcode';
+      this.initialSlide = 0;
     }
+  }
+
+  ionViewDidLoad() {
+
+    // Prevent the user from swiping the slides
+    this.slides.onlyExternal = true;
   }
 
   /**
@@ -85,46 +96,7 @@ export class AuthDeviceUserPage {
     this.verifyFingerprint();
   }
 
-  /**
-   * Handles the event when the passcode is completed on the passcode entry.
-   */
-  public onPasscodeCompleted($event: PasscodeCompletedEvent) {
-
-    // Check the passcode
-    this.passcodeService.verifyPasscode($event.passcode)
-      .subscribe(
-        data => {
-
-          // Notify the passcode entry that the passcode was correct
-          $event.source.notifyCorrect();
-
-          // Authenticate
-          this.authenticateUsingCachedCredentials();
-        },
-        reason => {
-
-          // Notify the passcode entry that the passcode was incorrect
-          $event.source.notifyIncorrect();
-
-          var passcodeError = reason as VerifyPasscodeError;
-
-          switch (passcodeError) {
-            case VerifyPasscodeError.NotEnabledOrSet:
-            case VerifyPasscodeError.NotMatchedLocked:
-            case VerifyPasscodeError.Locked:
-
-              // Flag that the passcode has been locked
-              this.passcodeLocked = true;
-
-              // Present the alert
-              this.presentPasscodeLockedAlert();
-              break;
-
-            default:
-              break;
-          }
-        });
-  }
+  // #region TouchID Authentication
 
   /**
    * Triggers TouchID to verify the fingerprint of the user. 
@@ -153,6 +125,263 @@ export class AuthDeviceUserPage {
           return Observable.throw(reason)
         });
   }
+
+  // #endregion
+
+  // #region Passcode Authentication
+
+  /**
+   * Handles the event when the passcode is completed on the passcode entry.
+   */
+  public onPasscodeCompleted($event: PasscodeCompletedEvent) {
+
+    // Check the passcode
+    this.passcodeService.verifyPasscode($event.passcode)
+      .subscribe(
+        data => {
+
+          // Notify the passcode entry that the passcode was correct
+          $event.source.notifyCorrect();
+
+          // Authenticate
+          this.authenticateUsingCachedCredentials();
+        },
+        reason => {
+
+          // Notify the passcode entry that the passcode was incorrect
+          $event.source.notifyIncorrect();
+          console.log('bad passcode reason', reason);
+          var passcodeError = reason as VerifyPasscodeError;
+
+          switch (passcodeError) {
+            case VerifyPasscodeError.NotEnabledOrSet:
+            case VerifyPasscodeError.NotMatchedLocked:
+            case VerifyPasscodeError.Locked:
+
+              // Flag that the passcode has been locked
+              this.passcodeLocked = true;
+
+              // Present the alert
+              this.presentPasscodeLockedAlert();
+              break;
+
+            default:
+              break;
+          }
+        });
+  }
+
+  /**
+   * Present the alert that informs the user that their passcode has been locked.
+   */
+  private presentPasscodeLockedAlert() {
+
+    // Create the alert
+    var alert = this.alertCtrl.create({
+      title: 'Passcode Locked',
+      subTitle: 'Log in with your password to unlock your passcode.',
+      buttons: [{
+        text: 'Enter Password',
+        handler: () => {
+          this.slideToPasswordSlide();
+        }
+      }]
+    });
+
+    // Present the alert
+    var promise = alert.present();
+
+    // Return
+    return promise;
+  }
+
+  /**
+   * Presents the alert that asks the user whether they would like to reset their password.
+   */
+  private presentResetPasscodeAlert() {
+
+    // Create the alert
+    var alert = this.alertCtrl.create({
+      title: 'Choose new passcode',
+      subTitle: 'Would you like to choose a new passcode?',
+      buttons: [{
+        text: 'Choose New Passcode',
+        handler: () => {
+          this.navigateToResetPasscodePage();
+        }
+      }, {
+        text: 'No Thanks',
+        role: 'cancel',
+        handler: () => {
+          this.navigateToWelcomePage();
+        }
+      }]
+    });
+
+    // Present the alert
+    var promise = alert.present();
+
+    // Return
+    return promise;
+  }
+
+  /**
+   * Gets a value indicating whether the "Enter Password" button should be shown.
+   * 
+   * @returns 
+   * @memberof AuthDeviceUserPage
+   */
+  public shouldShowEnterPasswordButton() {
+    return this.slides.getActiveIndex() === 0;
+  }
+
+  // #endregion
+
+  // #region Password Authentication
+
+  /**
+   * Builds the form.
+   */
+  private buildForm() {
+    this.authForm = this.formBuilder.group({
+      password: ['Monkey123', Validators.required],
+    });
+  }
+
+  /**
+   * Handles the form being submitted.
+   */
+  public onSubmit(formData) {
+
+    // Exit if the form isn't valid
+    if (!this.authForm.valid) {
+      return;
+    }
+
+    // Show loading spinner
+    var loading = this.loadingCtrl.create({
+      content: 'Authenticating'
+    });
+    loading.present();
+
+    // Perform the log in
+    this.authenticationService.logInAsDeviceUser(formData.password)
+      .subscribe(
+        data => {
+          // Dismiss the loading spinner
+          loading.dismiss()
+            .then(() => {
+              // Navigate
+              if (this.passcodeLocked) {
+                this.presentResetPasscodeAlert();
+              } else {
+                this.navigateToWelcomePage();
+              }
+            });
+        },
+        reason => {
+          // Clear the password
+          this.authForm.patchValue({ password: '' });
+
+          // Dismiss the loading spinner
+          loading.dismiss();
+
+          // Present the alert
+          this.presentIncorrectPasswordAlert();
+        });
+  }
+
+  /**
+   * Slides to the password slide.
+   */
+  private slideToPasswordSlide() {
+    this.slides.slideTo(1);
+  }
+
+  /**
+   * Presents the alert that informs the user that they have entered their password incorrectly.
+   */
+  private presentIncorrectPasswordAlert() {
+
+    // Create the alert
+    var alert = this.alertCtrl.create({
+      title: 'Login Failed',
+      subTitle: 'Please check your password and try again.',
+      buttons: [
+        // Try again
+        {
+          text: 'Try Again'
+        },
+        // Forgotten password
+        {
+          text: 'Forgotten Password?',
+          handler: () => {
+            this.navigateToForgottenPasswordPage();
+          }
+        }]
+    });
+
+    // Present the alert
+    var promise = alert.present();
+
+    // Return
+    return promise;
+  }
+
+
+  // #endregion
+
+  // #region Page Navigation
+
+  /**
+   * Navigates to the Auth New User page.
+   */
+  private navigateToAuthNewUserPage() {
+
+    // Push the new page
+    var promise = this.navCtrl.setRoot('oAuthNewUserPage', null, { animate: true, direction: 'backward' });
+
+    // Return
+    return promise;
+  }
+
+  /**
+   * Navigates to the Welcome page.
+   */
+  private navigateToWelcomePage() {
+
+    // Push the new page
+    var promise = this.navCtrl.setRoot('WelcomePage', null, { animate: true, direction: 'forward' });
+
+    // Return
+    return promise;
+  }
+
+  /**
+   * Navigates to the Forgotten Password page.
+   */
+  private navigateToForgottenPasswordPage() {
+
+    // Push the new page
+    var promise = this.navCtrl.push('ForgottenPasswordPage');
+
+    // Return
+    return promise;
+  }
+
+  /**
+   * Navigates to the Reset Passcode page.
+   */
+  private navigateToResetPasscodePage() {
+
+    // Push the new page
+    var promise = this.navCtrl.setRoot('ResetPasscodePage', null, { animate: true, direction: 'forward' });
+
+    // Return
+    return promise;
+  }
+
+  // #endregion
 
   /**
    * Authenticates the user using the credentials that were previously cached.
@@ -208,119 +437,6 @@ export class AuthDeviceUserPage {
   }
 
   /**
-   * Switches the page to be in the password state.
-   */
-  public switchToPasswordState() {
-    this.state = 'password';
-  }
-
-  /**
-   * Builds the form.
-   */
-  private buildForm() {
-    this.authForm = this.formBuilder.group({
-      password: ['Monkey111', Validators.required],
-    });
-  }
-
-  /**
-   * Handles the form being submitted.
-   */
-  public onSubmit(formData) {
-
-    // Exit if the form isn't valid
-    if (!this.authForm.valid) {
-      return;
-    }
-
-    // Show loading spinner
-    var loading = this.loadingCtrl.create({
-      content: 'Authenticating'
-    });
-    loading.present();
-
-    // Perform the log in
-    this.authenticationService.logInAsDeviceUser(formData.password)
-      .subscribe(
-        data => {
-          // Dismiss the loading spinner
-          loading.dismiss()
-            .then(() => {
-              // Navigate
-              if (this.passcodeLocked) {
-                this.presentResetPasscodeAlert();
-              } else {
-                this.navigateToWelcomePage();
-              }
-            });
-        },
-        reason => {
-          // Clear the password
-          this.authForm.patchValue({ password: '' });
-
-          // Dismiss the loading spinner
-          loading.dismiss();
-
-          // Present the alert
-          this.presentIncorrectPasswordAlert();
-        });
-  }
-
-  /**
-   * Present the alert that informs the user that their passcode has been locked.
-   */
-  private presentPasscodeLockedAlert() {
-
-    // Create the alert
-    var alert = this.alertCtrl.create({
-      title: 'Passcode Locked',
-      subTitle: 'Log in with your password to unlock your passcode.',
-      buttons: [{
-        text: 'Enter Password',
-        handler: () => {
-          this.state = 'password';
-        }
-      }]
-    });
-
-    // Present the alert
-    var promise = alert.present();
-
-    // Return
-    return promise;
-  }
-
-  /**
-   * Presents the alert that informs the user that they have entered their password incorrectly.
-   */
-  private presentIncorrectPasswordAlert() {
-
-    // Create the alert
-    var alert = this.alertCtrl.create({
-      title: 'Login Failed',
-      subTitle: 'Please check your password and try again.',
-      buttons: [
-        // Try again
-        {
-          text: 'Try Again'
-        },
-        // Forgotten password
-        {
-          text: 'Forgotten Password?',
-          handler: () => {
-            this.navigateToForgottenPasswordPage();
-          }
-        }]
-    });
-
-    // Present the alert
-    var promise = alert.present();
-
-    // Return
-    return promise;
-  }
-
-  /**
    * Presents the alert that informs the user that they have entered their password incorrectly.
    */
   private presentIncorrectCachedPasswordAlert() {
@@ -332,7 +448,7 @@ export class AuthDeviceUserPage {
       buttons: [{
         text: 'Enter Password',
         handler: () => {
-          this.state = 'password';
+          this.slideToPasswordSlide();
         }
       }]
     });
@@ -344,35 +460,7 @@ export class AuthDeviceUserPage {
     return promise;
   }
 
-  /**
-   * Presents the alert that asks the user whether they would like to reset their password.
-   */
-  private presentResetPasscodeAlert() {
 
-    // Create the alert
-    var alert = this.alertCtrl.create({
-      title: 'Choose new passcode',
-      subTitle: 'Would you like to choose a new passcode?',
-      buttons: [{
-        text: 'Choose New Passcode',
-        handler: () => {
-          this.navigateToResetPasscodePage();
-        }
-      }, {
-        text: 'No Thanks',
-        role: 'cancel',
-        handler: () => {
-          this.navigateToWelcomePage();
-        }
-      }]
-    });
-
-    // Present the alert
-    var promise = alert.present();
-
-    // Return
-    return promise;
-  }
 
   /**
    * Navigates to the Welcome page.
@@ -390,7 +478,7 @@ export class AuthDeviceUserPage {
           this.deviceUserService.clearDeviceUser()
             .subscribe(value => {
               // Navigate
-              this.navigateToStartPage();
+              this.navigateToAuthNewUserPage();
             });
         }
       }, {
@@ -405,56 +493,4 @@ export class AuthDeviceUserPage {
     // Return
     return promise;
   }
-
-  // #region Page Navigation
-
-  /**
-   * Navigates to the Start page.
-   */
-  private navigateToStartPage() {
-
-    // Push the new page
-    var promise = this.navCtrl.setRoot('StartPage', null, { animate: true, direction: 'backward' });
-
-    // Return
-    return promise;
-  }
-
-  /**
-   * Navigates to the Welcome page.
-   */
-  private navigateToWelcomePage() {
-
-    // Push the new page
-    var promise = this.navCtrl.setRoot('WelcomePage', null, { animate: true, direction: 'forward' });
-
-    // Return
-    return promise;
-  }
-
-  /**
-   * Navigates to the Forgotten Password page.
-   */
-  private navigateToForgottenPasswordPage() {
-
-    // Push the new page
-    var promise = this.navCtrl.push('ForgottenPasswordPage');
-
-    // Return
-    return promise;
-  }
-
-  /**
-   * Navigates to the Reset Passcode page.
-   */
-  private navigateToResetPasscodePage() {
-
-    // Push the new page
-    var promise = this.navCtrl.setRoot('ResetPasscodePage', null, { animate: true, direction: 'forward' });
-
-    // Return
-    return promise;
-  }
-
-  // #endregion
 }

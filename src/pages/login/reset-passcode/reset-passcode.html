@@ -1,18 +1,28 @@
-<!--
-  Generated template for the ResetPasscodePage page.
-
-  See http://ionicframework.com/docs/components/#navigation for more info on
-  Ionic pages and navigation.
--->
-<ion-header>
-
-  <ion-navbar>
-    <ion-title>reset-passcode</ion-title>
-  </ion-navbar>
-
-</ion-header>
-
-
-<ion-content padding>
-
+<ion-content class="bg-swoosh no-scroll">
+  <ion-slides>
+    <!-- Choose passcode slide -->
+    <ion-slide>
+      <p class="question">Choose a new passcode</p>
+      <passcode-entry numberOfDigits="4" (onPasscodeCompleted)="onChoosePasscodeCompleted($event)">
+      </passcode-entry>
+    </ion-slide>
+    <!-- Confirm passcode slide -->
+    <ion-slide>
+      <p class="question">Confirm your passcode</p>
+      <passcode-entry numberOfDigits="4" (onPasscodeCompleted)="onConfirmPasscodeCompleted($event)">
+      </passcode-entry>
+    </ion-slide>
+    <!-- Confirmation of change -->
+    <ion-slide>
+      <div class="padding-x2">
+        <p class="question">Yay, you're password has been changed.</p>
+        <div class="btn-row btn-inverse">
+          <button ion-button (click)="navigateToWelcomePage()" class="btn btn-default">Continue</button>
+        </div>
+      </div>
+    </ion-slide>
+  </ion-slides>
+  <div class="footer-buttons">
+    <button ion-button (click)="onSkip()">Skip</button>
+  </div>
 </ion-content>
