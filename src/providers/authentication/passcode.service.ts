@@ -82,7 +82,7 @@ export class PasscodeService {
             this.logger.warn('Passcode verification failed. Passcode is not enabled.')
 
             // Return
-            return Observable.throw(VerifyPasscodeError.NotEnabledOrSet);
+            return Observable.throw(new VerifyPasscodeError(VerifyPasscodeErrorReason.NotEnabledOrSet));
         }
 
         // Check if the passcode is locked
@@ -91,13 +91,20 @@ export class PasscodeService {
             this.logger.warn('Passcode verification failed. Passcode is locked.')
 
             // Return
-            return Observable.throw(VerifyPasscodeError.Locked);
+            return Observable.throw(new VerifyPasscodeError(VerifyPasscodeErrorReason.Locked));
         }
 
         var verifyPasscodeError: VerifyPasscodeError = null;
 
         // Get the passcode from secure storage
         var observable = this.secureStorageWrapper.get(PasscodeStorageKey)
+            .catch(reason => {
+
+                this.logger.warn('Failed to get passcode from secure storage.', reason)
+
+                // Throw
+                return Observable.throw(new VerifyPasscodeError(VerifyPasscodeErrorReason.NotEnabledOrSet));
+            })
             .flatMap(data => {
 
                 this.logger.debug('Got passcode from secure storage.');
@@ -115,7 +122,7 @@ export class PasscodeService {
                     deviceUser.passcode.failedAttempts++;
 
                     // Set the error
-                    verifyPasscodeError = VerifyPasscodeError.NotMatched
+                    verifyPasscodeError = new VerifyPasscodeError(VerifyPasscodeErrorReason.NotMatched);
 
                     // Lock the passcode if too many failed attempts have been made
                     if (autoLock && deviceUser.passcode.failedAttempts >= MaxFailedAttemptsBeforeLockout) {
@@ -125,7 +132,7 @@ export class PasscodeService {
                         deviceUser.passcode.locked = true;
 
                         // Set the error
-                        verifyPasscodeError = VerifyPasscodeError.NotMatchedLocked
+                        verifyPasscodeError.reason = VerifyPasscodeErrorReason.NotMatchedLocked
                     }
                 }
 
@@ -141,13 +148,6 @@ export class PasscodeService {
                 } else {
                     return Observable.throw(verifyPasscodeError);
                 }
-            })
-            .catch(reason => {
-
-                this.logger.warn('Failed to get passcode from secure storage.', reason)
-
-                // Throw
-                return Observable.throw(VerifyPasscodeError.NotEnabledOrSet);
             });
 
         // Return
@@ -208,10 +208,15 @@ export class PasscodeService {
     }
 }
 
+export class VerifyPasscodeError {
+    constructor(public reason: VerifyPasscodeErrorReason) {
+    }
+}
+
 /**
  * Specifies the different errors that can occur when verifying a passcode.
  */
-export enum VerifyPasscodeError {
+export enum VerifyPasscodeErrorReason {
     NotEnabledOrSet,
     Locked,
     NotMatched,

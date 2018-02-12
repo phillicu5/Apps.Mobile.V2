@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { StatusBar } from '@ionic-native/status-bar';
-import { Platform } from 'ionic-angular';
+import { Keyboard, Platform } from 'ionic-angular';
 
 import { AuthDeviceUserPage, AuthNewUserPage } from '../pages/login';
 import { Settings } from '../providers';
@@ -17,6 +17,7 @@ export class MyApp {
 
   constructor(
     platform: Platform,
+    keyboard: Keyboard,
     statusBar: StatusBar,
     splashScreen: SplashScreen,
     private settings: Settings,
@@ -25,6 +26,14 @@ export class MyApp {
     platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
+
+      keyboard.willShow.subscribe(() => {
+        document.body.classList.add('keyboard-is-open');
+      })
+
+      keyboard.willHide.subscribe(() => {
+        document.body.classList.remove('keyboard-is-open');
+      })
 
       this.bootstrap()
         .then(() => {
@@ -43,13 +52,9 @@ export class MyApp {
             }
           }
 
-          statusBar.styleDefault();
+          statusBar.styleBlackTranslucent();
           splashScreen.hide();
         });
-
-
-
-
 
       // Determine which page to go to
       // 1) First open page

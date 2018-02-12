@@ -5,14 +5,14 @@
   Ionic pages and navigation.
 -->
 <ion-header padding>
-  <img src="assets/images/logo.png" style="width: 75px;">
+  <img src="assets/images/logo.png" style="width: 128px;">
 </ion-header>
 
 <ion-content no-bounce>
   <ion-slides [pager]="true">
     <ion-slide>
       <div padding>
-        <h2>Let's get started</h2>
+        <h2 style="font-size: 4rem; font-weight: normal;">Let's get started</h2>
         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc sit amet condimentum turpis. Donec porttitor in quam
           at posuere. Aliquam placerat hendrerit tellus, a rutrum felis ullamcorper id.</p>
       </div>
@@ -34,7 +34,7 @@
   </ion-slides>
 </ion-content>
 
-<ion-footer padding>
+<ion-footer>
   <div class="button-row">
     <button (click)="navigateToSignupPage()" ion-button>Sign up</button>
     <button (click)="navigateToAuthNewUserPage()" ion-button>Log in</button>

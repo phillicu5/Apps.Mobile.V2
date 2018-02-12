@@ -1,6 +1,4 @@
 // http://ionicframework.com/docs/theming/
-
-
 // App Global Sass
 // --------------------------------------------------
 // Put style rules here that you want to apply globally. These
@@ -14,5 +12,21 @@
 // To declare rules for a specific mode, create a child rule
 // for the .md, .ios, or .wp mode classes. The mode class is
 // automatically applied to the <body> element in the app.
-
 @import '../scss/index';
+.keyboard-is-open {
+  .hide-when-keyboard-open {
+    display: none;
+  }
+}
+
+.dock-bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.keyboard-is-open img.logo {
+  margin: 0 auto;
+  transform: scale(0.5); //width: 64px;
+}

@@ -1,4 +1,13 @@
-<ion-content class="bg-swoosh no-scroll">
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons end>
+      <button ion-button (click)="skip()">
+        Skip
+      </button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content no-bounce style="background: #333;">
   <ion-slides>
     <!-- Choose passcode slide -->
     <ion-slide>
@@ -15,14 +24,11 @@
     <!-- Confirmation of change -->
     <ion-slide>
       <div class="padding-x2">
-        <p class="question">Yay, you're password has been changed.</p>
+        <p class="question">Yay, your password has been changed.</p>
         <div class="btn-row btn-inverse">
           <button ion-button (click)="navigateToWelcomePage()" class="btn btn-default">Continue</button>
         </div>
       </div>
     </ion-slide>
   </ion-slides>
-  <div class="footer-buttons">
-    <button ion-button (click)="onSkip()">Skip</button>
-  </div>
 </ion-content>

@@ -14,6 +14,7 @@ import {
 } from '../../../providers';
 import { AuthenticationService, LogInError, LogInErrorType } from '../../../providers/authentication/authentication.service';
 import { PasscodeCompletedEvent } from '../../../ui';
+import { VerifyPasscodeErrorReason } from './../../../providers/authentication/passcode.service';
 
 @IonicPage()
 @Component({
@@ -73,14 +74,19 @@ export class AuthDeviceUserPage {
     }
   }
 
-  ionViewDidLoad() {
+  // #region Page Events
+
+  /**
+   * Handles the event when the view has loaded.
+   */
+  public ionViewDidLoad() {
 
     // Prevent the user from swiping the slides
     this.slides.onlyExternal = true;
   }
 
   /**
-   * Handles the event when the when the view has become active.
+   * Handles the event when the view has entered.
    */
   public ionViewDidEnter() {
 
@@ -95,6 +101,8 @@ export class AuthDeviceUserPage {
     // Verify the fingerprint if applicable
     this.verifyFingerprint();
   }
+
+  // #endregion
 
   // #region TouchID Authentication
 
@@ -150,23 +158,27 @@ export class AuthDeviceUserPage {
 
           // Notify the passcode entry that the passcode was incorrect
           $event.source.notifyIncorrect();
-          console.log('bad passcode reason', reason);
-          var passcodeError = reason as VerifyPasscodeError;
 
-          switch (passcodeError) {
-            case VerifyPasscodeError.NotEnabledOrSet:
-            case VerifyPasscodeError.NotMatchedLocked:
-            case VerifyPasscodeError.Locked:
+          if (reason instanceof VerifyPasscodeError) {
+            var passcodeError = reason as VerifyPasscodeError;
 
-              // Flag that the passcode has been locked
-              this.passcodeLocked = true;
+            switch (passcodeError.reason) {
+              case VerifyPasscodeErrorReason.NotEnabledOrSet:
+              case VerifyPasscodeErrorReason.NotMatchedLocked:
+              case VerifyPasscodeErrorReason.Locked:
 
-              // Present the alert
-              this.presentPasscodeLockedAlert();
-              break;
+                // Flag that the passcode has been locked
+                this.passcodeLocked = true;
 
-            default:
-              break;
+                // Present the alert
+                this.presentPasscodeLockedAlert();
+                break;
+
+              default:
+                break;
+            }
+          } else {
+            // TODO: Handle other error
           }
         });
   }
@@ -339,7 +351,7 @@ export class AuthDeviceUserPage {
   private navigateToAuthNewUserPage() {
 
     // Push the new page
-    var promise = this.navCtrl.setRoot('oAuthNewUserPage', null, { animate: true, direction: 'backward' });
+    var promise = this.navCtrl.setRoot('AuthNewUserPage', null, { animate: true, direction: 'backward' });
 
     // Return
     return promise;
@@ -382,6 +394,8 @@ export class AuthDeviceUserPage {
   }
 
   // #endregion
+
+  // #region Miscellaneous
 
   /**
    * Authenticates the user using the credentials that were previously cached.
@@ -460,10 +474,8 @@ export class AuthDeviceUserPage {
     return promise;
   }
 
-
-
   /**
-   * Navigates to the Welcome page.
+   * Logs the current user out and navigates to the Auth New User page.
    */
   public logInAsDifferentUser() {
 
@@ -474,6 +486,7 @@ export class AuthDeviceUserPage {
       buttons: [{
         text: 'Continue',
         handler: () => {
+          // Actually log out
           // Clear the current user
           this.deviceUserService.clearDeviceUser()
             .subscribe(value => {
@@ -493,4 +506,6 @@ export class AuthDeviceUserPage {
     // Return
     return promise;
   }
+
+  // #endregion
 }

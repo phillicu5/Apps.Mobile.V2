@@ -97,15 +97,6 @@ export class ResetPasscodePage {
   }
 
   /**
-   * Handles the user skipping resetting their a passcode.
-   */
-  public onSkip() {
-
-    // Navigate
-    this.navigateToWelcomePage();
-  }
-
-  /**
    * Navigates to the Welcome page.
    */
   private navigateToWelcomePage() {
@@ -146,5 +137,12 @@ export class ResetPasscodePage {
 
     // Return
     return promise;
+  }
+
+  /**
+   * Skips configuring the passcode and navigates to the next page.
+   */
+  public skip() {
+    return this.navigateToWelcomePage();
   }
 }

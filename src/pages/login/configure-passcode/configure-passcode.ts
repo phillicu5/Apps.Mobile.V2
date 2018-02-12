@@ -95,11 +95,6 @@ export class ConfigurePasscodePage {
 
   /**
    * Navigates to the next page depending on whether TouchID is available.
-   * 
-   * @private
-   * @returns
-   * 
-   * @memberOf ConfigurePasscodePage
    */
   private navigateToNextPage() {
 
@@ -112,11 +107,6 @@ export class ConfigurePasscodePage {
 
   /**
    * Presents the alert that they have enterrd the incorrect passcode when confirming.
-   * 
-   * @private
-   * @returns
-   * 
-   * @memberOf ConfigurePasscodePage
    */
   private presentIncorrectPasscodeAlert() {
 

@@ -1,22 +1,41 @@
-page-welcome {}
-
-.slides {
-
-  .swiper-pagination {
-    padding: 0 16px;
-    text-align: left;
-    button {
-      width: 32px;
-      height: 4px;
-      border-radius: 0;
+page-welcome {
+  .content {
+    color: #fff;
+    background: #333 url('../assets/images/blurred-girl.jpg');
+    background-size: cover;
+  }
+  .slides {
+    .swiper-pagination {
+      padding: 0 16px;
+      text-align: left;
+      button {
+        width: 32px;
+        height: 4px;
+        border-radius: 0;
+        background: #fff;
+        &:first-child {
+          margin-left: 0;
+        }
+        &:last-child {
+          margin-right: 0;
+        }
+      }
     }
   }
-}
-
-.button-row {
-  display: flex;
-  flex-direction: row;
-  button {
-    flex: 1;
+  .button-row {
+    display: flex;
+    flex-direction: row;
+    button {
+      flex: 1;
+      margin: 16px 8px;
+      border: 1px solid #fff;
+      background: transparent;
+      &:first-child {
+        margin-left: 16px;
+      }
+      &:last-child {
+        margin-right: 16px;
+      }
+    }
   }
 }
